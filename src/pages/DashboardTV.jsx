@@ -305,6 +305,46 @@ function ShipsTable({ ships }) {
 /* TODO LIST                            */
 /* ─────────────────────────────────── */
 function TodoList({ todos }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    let scrollPos = 0;
+    let direction = 1;
+    let paused = false;
+    let timerId = null;
+
+    const scrollInterval = setInterval(() => {
+      if (paused) return;
+
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      if (maxScroll <= 0) return;
+
+      scrollPos += direction * 0.5; // Velocidad de scroll
+
+      if (scrollPos >= maxScroll) {
+        scrollPos = maxScroll;
+        direction = -1;
+        paused = true;
+        timerId = setTimeout(() => { paused = false; }, 3000);
+      } else if (scrollPos <= 0) {
+        scrollPos = 0;
+        direction = 1;
+        paused = true;
+        timerId = setTimeout(() => { paused = false; }, 3000);
+      }
+
+      el.scrollTop = scrollPos;
+    }, 30);
+
+    return () => {
+      clearInterval(scrollInterval);
+      if (timerId) clearTimeout(timerId);
+    };
+  }, [todos]);
+
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       {todos.length === 0 ? (
@@ -314,7 +354,12 @@ function TodoList({ todos }) {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-2 flex-1 overflow-hidden">
+        <div 
+          ref={containerRef}
+          className="flex flex-col gap-2 flex-1 overflow-y-auto no-scrollbar"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
           {todos.map((todo, idx) => (
             <div
               key={todo.id}
