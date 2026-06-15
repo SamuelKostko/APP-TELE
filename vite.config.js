@@ -8,4 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api/binance': {
+        target: 'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/binance/, '')
+      }
+    }
+  }
 })

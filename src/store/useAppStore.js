@@ -30,6 +30,31 @@ export function useAppStore() {
           const resEur = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
           const dataEur = await resEur.json();
           
+          let usdtPrice = null;
+          try {
+            const resBinance = await fetch('/api/binance', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                proMerchantAds: false,
+                page: 1,
+                rows: 1,
+                payTypes: [],
+                countries: [],
+                publisherType: null,
+                asset: 'USDT',
+                fiat: 'VES',
+                tradeType: 'SELL'
+              })
+            });
+            const dataBinance = await resBinance.json();
+            if (dataBinance && dataBinance.data && dataBinance.data.length > 0) {
+              usdtPrice = parseFloat(dataBinance.data[0].adv.price);
+            }
+          } catch (errBinance) {
+            console.error('Error fetching Binance auto', errBinance);
+          }
+          
           let updateData = {};
           if (dataUsd && dataUsd.promedio) {
             updateData.bcv = dataUsd.promedio.toFixed(2);
@@ -37,11 +62,14 @@ export function useAppStore() {
           if (dataEur && dataEur.promedio) {
             updateData.bcvEuro = dataEur.promedio.toFixed(2);
           }
+          if (usdtPrice) {
+            updateData.usdt = usdtPrice.toFixed(2);
+          }
           if (Object.keys(updateData).length > 0) {
             await setDoc(doc(db, 'finance', 'rates'), updateData, { merge: true });
           }
         } catch (e) {
-          console.error('Error fetching BCV auto', e);
+          console.error('Error fetching auto rates', e);
         }
       };
       
