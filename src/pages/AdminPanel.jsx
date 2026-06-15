@@ -1,34 +1,185 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '../store/useAppStore';
-import { Settings, Plus, Trash2, Home, Save, CheckSquare, Eye, EyeOff } from 'lucide-react';
+import {
+  Settings, Plus, Trash2, Home, Save,
+  CheckSquare, Eye, EyeOff, Ship, TrendingUp,
+  DollarSign, Check, X, Anchor, Clock, CheckCircle
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { format, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
 
+/* ─── Status config ─────────────────────────── */
+const STATUS_OPTIONS = [
+  { value: 'Programado',   label: 'Programado',   color: '#9090A4', icon: Anchor      },
+  { value: 'En tránsito',  label: 'En tránsito',  color: '#F59E0B', icon: Clock       },
+  { value: 'En puerto',    label: 'En puerto',     color: '#22C55E', icon: CheckCircle },
+];
+
+/* ─── Reusable input styles ─────────────────── */
+const inputClass = `
+  w-full rounded-lg px-4 py-2.5 text-sm font-medium text-white
+  bg-[#16161C] border border-[rgba(255,255,255,0.08)]
+  focus:outline-none focus:border-[rgba(255,255,255,0.25)]
+  placeholder:text-[rgba(255,255,255,0.2)]
+  transition-colors
+`.trim();
+
+const selectClass = `
+  w-full rounded-lg px-4 py-2.5 text-sm font-medium text-white
+  bg-[#16161C] border border-[rgba(255,255,255,0.08)]
+  focus:outline-none focus:border-[rgba(255,255,255,0.25)]
+  transition-colors appearance-none cursor-pointer
+`.trim();
+
+/* ─── Section Card ──────────────────────────── */
+function SectionCard({ accentColor = '#fff', title, icon: Icon, children }) {
+  return (
+    <div
+      style={{
+        background: '#1E1E26',
+        border: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: '14px',
+        overflow: 'hidden',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+      }}
+    >
+      {/* Top accent line */}
+      <div style={{ height: '3px', background: accentColor }} />
+
+      {/* Header */}
+      <div
+        style={{
+          padding: '18px 24px',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}
+      >
+        <div
+          style={{
+            width: '34px', height: '34px',
+            borderRadius: '8px',
+            background: `${accentColor}18`,
+            border: `1px solid ${accentColor}30`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <Icon size={17} color={accentColor} strokeWidth={2.5} />
+        </div>
+        <span
+          style={{
+            fontFamily: 'Rajdhani, Inter, sans-serif',
+            fontSize: '1rem',
+            fontWeight: 700,
+            letterSpacing: '0.06em',
+            textTransform: 'uppercase',
+            color: 'rgba(255,255,255,0.9)',
+          }}
+        >
+          {title}
+        </span>
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: '20px 24px' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Form Label ────────────────────────────── */
+function FieldLabel({ children }) {
+  return (
+    <label
+      style={{
+        display: 'block',
+        fontFamily: 'Inter',
+        fontSize: '0.65rem',
+        fontWeight: 700,
+        letterSpacing: '0.16em',
+        textTransform: 'uppercase',
+        color: 'rgba(255,255,255,0.35)',
+        marginBottom: '6px',
+      }}
+    >
+      {children}
+    </label>
+  );
+}
+
+/* ─── Primary Button ────────────────────────── */
+function PrimaryButton({ color = '#22C55E', icon: Icon, children, type = 'button', onClick }) {
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        background: color,
+        color: '#fff',
+        border: 'none',
+        borderRadius: '8px',
+        padding: '10px 20px',
+        fontFamily: 'Inter',
+        fontSize: '0.82rem',
+        fontWeight: 700,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        cursor: 'pointer',
+        transition: 'opacity 0.15s, transform 0.1s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
+      onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+      onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.98)'; }}
+      onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)'; }}
+    >
+      {Icon && <Icon size={16} strokeWidth={2.5} />}
+      {children}
+    </button>
+  );
+}
+
+/* ─── MAIN COMPONENT ────────────────────────── */
 export default function AdminPanel() {
-  const { ships, finance, todos, settings, addShip, removeShip, updateFinance, addTodo, toggleTodo, removeTodo, updateSettings } = useAppStore();
-  
-  const [bcvInput, setBcvInput] = useState(finance.bcv);
-  const [usdtInput, setUsdtInput] = useState(finance.usdt);
+  const {
+    ships, finance, todos, settings,
+    addShip, removeShip, updateFinance,
+    addTodo, toggleTodo, removeTodo, updateSettings,
+  } = useAppStore();
 
-  const [newShipName, setNewShipName] = useState('');
+  const [bcvInput, setBcvInput]         = useState(finance.bcv);
+  const [usdtInput, setUsdtInput]       = useState(finance.usdt);
+  const [newShipName, setNewShipName]   = useState('');
   const [newShipStatus, setNewShipStatus] = useState('Programado');
-  const [newShipEta, setNewShipEta] = useState('');
+  const [newShipEta, setNewShipEta]     = useState('');
+  const [newTodo, setNewTodo]           = useState('');
+  const [savedFlash, setSavedFlash]     = useState(false);
 
-  const [newTodo, setNewTodo] = useState('');
+  // Sincronizar inputs cuando Firebase actualiza los valores
+  useEffect(() => {
+    setBcvInput(finance.bcv);
+    setUsdtInput(finance.usdt);
+  }, [finance.bcv, finance.usdt]);
 
   const handleSaveFinance = (e) => {
     e.preventDefault();
     updateFinance({ bcv: bcvInput, usdt: usdtInput });
-    alert('Tasas actualizadas correctamente');
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 2000);
   };
 
   const handleAddShip = (e) => {
     e.preventDefault();
     if (!newShipName || !newShipEta) return;
-    addShip({
-      name: newShipName,
-      status: newShipStatus,
-      eta: newShipEta
-    });
+    addShip({ name: newShipName.toUpperCase(), status: newShipStatus, eta: newShipEta });
     setNewShipName('');
     setNewShipStatus('Programado');
     setNewShipEta('');
@@ -36,214 +187,481 @@ export default function AdminPanel() {
 
   const handleAddTodo = (e) => {
     e.preventDefault();
-    if (!newTodo) return;
-    addTodo(newTodo);
+    if (!newTodo.trim()) return;
+    addTodo(newTodo.trim());
     setNewTodo('');
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 p-6 font-sans">
-      <div className="max-w-4xl mx-auto space-y-8">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-          <div className="flex items-center gap-4">
-            <Settings size={32} className="text-brand-red" />
-            <div>
-              <h1 className="text-2xl font-bold text-white">Panel de Administración</h1>
-              <p className="text-slate-400 text-sm">Gestiona la información de la pantalla de TV en tiempo real.</p>
-            </div>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0E0E12 0%, #141418 60%, #0A0A0F 100%)',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        color: '#E8E8F0',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+      }}
+    >
+      {/* ── TOP NAV ── */}
+      <div
+        style={{
+          background: 'rgba(20,20,26,0.98)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          padding: '0 32px',
+          height: '64px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+        }}
+      >
+        {/* Left: Brand */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div
+            style={{
+              width: '36px', height: '36px',
+              borderRadius: '9px',
+              background: 'rgba(190,22,34,0.15)',
+              border: '1px solid rgba(190,22,34,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Settings size={18} color="#BE1622" strokeWidth={2.5} />
           </div>
-          <Link to="/" className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors font-medium text-white">
-            <Home size={20} />
-            Ver Pantalla
-          </Link>
+          <div>
+            <p
+              style={{
+                fontFamily: 'Rajdhani, sans-serif',
+                fontSize: '1rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                color: '#fff',
+                lineHeight: 1,
+                marginBottom: '2px',
+              }}
+            >
+              Panel de Administración
+            </p>
+            <p style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', lineHeight: 1 }}>
+              Gestión en tiempo real · TAM CARGO
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* Tasas Financieras */}
-          <div className="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-              <span className="w-2 h-6 bg-brand-success rounded-full"></span>
-              Tasas del Día
-            </h2>
-            <form onSubmit={handleSaveFinance} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Tasa BCV (Bs.)</label>
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  value={bcvInput} 
-                  onChange={(e) => setBcvInput(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-red"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Tasa USDT (Bs.)</label>
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  value={usdtInput} 
-                  onChange={(e) => setUsdtInput(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-red"
-                  required
-                />
-              </div>
-              <button type="submit" className="w-full flex items-center justify-center gap-2 bg-brand-success hover:bg-brand-success/80 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                <Save size={20} />
-                Guardar Tasas
-              </button>
-            </form>
-          </div>
+        {/* Right: Ver pantalla */}
+        <Link
+          to="/"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '8px 18px',
+            borderRadius: '8px',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            color: 'rgba(255,255,255,0.75)',
+            textDecoration: 'none',
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.75)'; }}
+        >
+          <Home size={15} strokeWidth={2.5} />
+          Ver Pantalla TV
+        </Link>
+      </div>
 
-          {/* Agregar Barco */}
-          <div className="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-              <span className="w-2 h-6 bg-brand-warning rounded-full"></span>
-              Agregar Arribo (ETA)
-            </h2>
-            <form onSubmit={handleAddShip} className="space-y-4">
+      {/* ── BODY ── */}
+      <div
+        style={{
+          maxWidth: '960px',
+          margin: '0 auto',
+          padding: '32px 24px 64px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '28px',
+        }}
+      >
+
+        {/* ROW 1: Tasas + Agregar barco */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+
+          {/* Tasas */}
+          <SectionCard accentColor="#22C55E" title="Tasas del Día" icon={TrendingUp}>
+            <form onSubmit={handleSaveFinance} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Nombre del Barco o Viaje</label>
-                <input 
-                  type="text" 
-                  value={newShipName} 
-                  onChange={(e) => setNewShipName(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-red uppercase"
+                <FieldLabel>Tasa BCV Oficial (Bs.)</FieldLabel>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={bcvInput}
+                  onChange={e => setBcvInput(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </div>
+              <div>
+                <FieldLabel>Tasa USDT (Bs.)</FieldLabel>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={usdtInput}
+                  onChange={e => setUsdtInput(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </div>
+              <div style={{ marginTop: '4px' }}>
+                <PrimaryButton
+                  type="submit"
+                  color={savedFlash ? '#16A34A' : '#22C55E'}
+                  icon={savedFlash ? Check : Save}
+                >
+                  {savedFlash ? '¡Guardado!' : 'Guardar Tasas'}
+                </PrimaryButton>
+              </div>
+            </form>
+          </SectionCard>
+
+          {/* Agregar barco */}
+          <SectionCard accentColor="#F59E0B" title="Agregar Arribo (ETA)" icon={Ship}>
+            <form onSubmit={handleAddShip} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <FieldLabel>Nombre del Buque / Viaje</FieldLabel>
+                <input
+                  type="text"
+                  value={newShipName}
+                  onChange={e => setNewShipName(e.target.value)}
+                  className={inputClass}
                   placeholder="Ej. MSC ALINA"
                   required
+                  style={{ textTransform: 'uppercase' }}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Estado</label>
-                <select 
-                  value={newShipStatus} 
-                  onChange={(e) => setNewShipStatus(e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-red"
+                <FieldLabel>Estado</FieldLabel>
+                <select
+                  value={newShipStatus}
+                  onChange={e => setNewShipStatus(e.target.value)}
+                  className={selectClass}
                 >
-                  <option value="Programado">Programado</option>
-                  <option value="En tránsito">En tránsito</option>
-                  <option value="En puerto">En puerto</option>
+                  {STATUS_OPTIONS.map(s => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1">Fecha Estimada (ETA)</label>
-                <input 
-                  type="date" 
-                  value={newShipEta} 
-                  onChange={(e) => setNewShipEta(e.target.value)} 
-                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-red [color-scheme:dark]"
+                <FieldLabel>Fecha Estimada (ETA)</FieldLabel>
+                <input
+                  type="date"
+                  value={newShipEta}
+                  onChange={e => setNewShipEta(e.target.value)}
+                  className={inputClass}
                   required
+                  style={{ colorScheme: 'dark' }}
                 />
               </div>
-              <button type="submit" className="w-full flex items-center justify-center gap-2 bg-brand-red hover:bg-brand-red/80 text-brand-dark font-bold py-2 px-4 rounded-lg transition-colors">
-                <Plus size={20} />
-                Agregar a la Lista
-              </button>
+              <div style={{ marginTop: '4px' }}>
+                <PrimaryButton type="submit" color="#F59E0B" icon={Plus}>
+                  Agregar a la Lista
+                </PrimaryButton>
+              </div>
             </form>
-          </div>
-
+          </SectionCard>
         </div>
 
-        {/* Lista de Barcos Actuales */}
-        <div className="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-          <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-            <span className="w-2 h-6 bg-brand-red rounded-full"></span>
-            Barcos en Pantalla ({ships.length})
-          </h2>
-          
-          <div className="space-y-3">
-            {ships.length === 0 ? (
-              <p className="text-slate-400 text-center py-4">No hay barcos agregados.</p>
-            ) : (
-              ships.map(ship => (
-                <div key={ship.id} className="flex flex-col sm:flex-row sm:items-center justify-between bg-slate-900 p-4 rounded-lg border border-slate-700/50 hover:border-slate-600 transition-colors">
-                  <div className="mb-2 sm:mb-0">
-                    <p className="font-bold text-white uppercase">{ship.name}</p>
-                    <div className="flex gap-4 text-sm text-slate-400 mt-1">
-                      <span>Estado: <span className="font-semibold text-slate-300">{ship.status}</span></span>
-                      <span>ETA: <span className="font-semibold text-slate-300">{ship.eta}</span></span>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => removeShip(ship.id)}
-                    className="flex items-center justify-center gap-2 text-brand-danger hover:bg-brand-danger/10 px-3 py-2 rounded-lg transition-colors"
-                    title="Eliminar"
+        {/* ROW 2: Lista de barcos */}
+        <SectionCard accentColor="#BE1622" title={`Buques en Pantalla (${ships.length})`} icon={Ship}>
+          {ships.length === 0 ? (
+            <div
+              style={{
+                padding: '32px',
+                textAlign: 'center',
+                color: 'rgba(255,255,255,0.2)',
+                fontSize: '0.9rem',
+              }}
+            >
+              No hay buques agregados aún.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {/* Table header */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 160px 140px 40px',
+                  gap: '16px',
+                  padding: '0 14px 8px',
+                  borderBottom: '1px solid rgba(255,255,255,0.05)',
+                }}
+              >
+                {['BUQUE', 'ESTADO', 'ETA', ''].map((h, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: '0.6rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.16em',
+                      color: 'rgba(255,255,255,0.25)',
+                      textTransform: 'uppercase',
+                    }}
                   >
-                    <Trash2 size={18} />
-                    <span className="sm:hidden">Eliminar</span>
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+                    {h}
+                  </span>
+                ))}
+              </div>
 
-        {/* Tareas / To-Do List */}
-        <div className="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-              <CheckSquare className="text-brand-success" size={24} />
-              Tareas del Día (To-Do)
-            </h2>
+              {/* Rows */}
+              {ships.map(ship => {
+                const conf = STATUS_OPTIONS.find(s => s.value === ship.status) || STATUS_OPTIONS[0];
+                const eta = ship.eta
+                  ? format(parseISO(ship.eta), "d 'de' MMMM, yyyy", { locale: es })
+                  : 'Por definir';
+                return (
+                  <div
+                    key={ship.id}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 160px 140px 40px',
+                      gap: '16px',
+                      alignItems: 'center',
+                      padding: '12px 14px',
+                      borderRadius: '8px',
+                      background: 'rgba(255,255,255,0.025)',
+                      borderLeft: `3px solid ${conf.color}`,
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; }}
+                  >
+                    {/* Name */}
+                    <span
+                      style={{
+                        fontFamily: 'Rajdhani, sans-serif',
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        color: '#fff',
+                        letterSpacing: '0.04em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {ship.name}
+                    </span>
+
+                    {/* Status */}
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        padding: '3px 10px',
+                        borderRadius: '4px',
+                        background: `${conf.color}15`,
+                        border: `1px solid ${conf.color}30`,
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: conf.color,
+                        width: 'fit-content',
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: '6px', height: '6px',
+                          borderRadius: '50%',
+                          background: conf.color,
+                        }}
+                      />
+                      {ship.status}
+                    </div>
+
+                    {/* ETA */}
+                    <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.3 }}>
+                      {eta}
+                    </span>
+
+                    {/* Delete */}
+                    <button
+                      onClick={() => removeShip(ship.id)}
+                      title="Eliminar"
+                      style={{
+                        width: '32px', height: '32px',
+                        borderRadius: '7px',
+                        border: '1px solid rgba(239,68,68,0.2)',
+                        background: 'rgba(239,68,68,0.07)',
+                        color: '#EF4444',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                        flexShrink: 0,
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.18)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.07)'; }}
+                    >
+                      <Trash2 size={14} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </SectionCard>
+
+        {/* ROW 3: Tareas */}
+        <SectionCard accentColor="#BE1622" title="Tareas del Día" icon={CheckSquare}>
+          {/* Header extra: toggle visibilidad */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '16px' }}>
             <button
               onClick={() => updateSettings({ showTodos: !settings.showTodos })}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-colors ${
-                settings.showTodos 
-                  ? 'bg-brand-success/20 text-brand-success hover:bg-brand-success/30' 
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-              }`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '7px',
+                padding: '6px 14px',
+                borderRadius: '7px',
+                border: `1px solid ${settings.showTodos ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                background: settings.showTodos ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.05)',
+                color: settings.showTodos ? '#22C55E' : 'rgba(255,255,255,0.4)',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
             >
-              {settings.showTodos ? <Eye size={18} /> : <EyeOff size={18} />}
+              {settings.showTodos ? <Eye size={14} strokeWidth={2.5} /> : <EyeOff size={14} strokeWidth={2.5} />}
               {settings.showTodos ? 'Visible en TV' : 'Oculto en TV'}
             </button>
           </div>
 
-          <form onSubmit={handleAddTodo} className="flex gap-2 mb-6">
-            <input 
-              type="text" 
-              value={newTodo} 
-              onChange={(e) => setNewTodo(e.target.value)} 
-              className="flex-1 bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand-success"
+          {/* Add todo form */}
+          <form
+            onSubmit={handleAddTodo}
+            style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}
+          >
+            <input
+              type="text"
+              value={newTodo}
+              onChange={e => setNewTodo(e.target.value)}
+              className={inputClass}
               placeholder="Ej. Enviar reporte de Aduanas..."
               required
+              style={{ flex: 1 }}
             />
-            <button type="submit" className="bg-brand-success hover:bg-brand-success/80 text-white font-bold py-2 px-6 rounded-lg transition-colors">
+            <button
+              type="submit"
+              style={{
+                flexShrink: 0,
+                padding: '0 20px',
+                borderRadius: '8px',
+                background: '#BE1622',
+                color: '#fff',
+                border: 'none',
+                fontFamily: 'Inter',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'opacity 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+            >
+              <Plus size={15} strokeWidth={2.5} />
               Añadir
             </button>
           </form>
-          
-          <div className="space-y-2">
-            {todos.length === 0 ? (
-              <p className="text-slate-400 text-center py-4">No hay tareas pendientes.</p>
-            ) : (
-              todos.map(todo => (
-                <div key={todo.id} className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${todo.completed ? 'bg-slate-900/50 border-slate-800' : 'bg-slate-900 border-slate-700/50'}`}>
-                  <label className="flex items-center gap-4 cursor-pointer flex-1">
-                    <input 
-                      type="checkbox" 
-                      checked={todo.completed}
-                      onChange={() => toggleTodo(todo.id, todo.completed)}
-                      className="w-5 h-5 rounded border-slate-600 text-brand-success focus:ring-brand-success bg-slate-800"
-                    />
-                    <span className={`text-lg font-medium transition-all ${todo.completed ? 'text-slate-500 line-through' : 'text-slate-200'}`}>
-                      {todo.text}
-                    </span>
-                  </label>
-                  <button 
-                    onClick={() => removeTodo(todo.id)}
-                    className="text-brand-danger hover:bg-brand-danger/10 p-2 rounded-lg transition-colors ml-4"
-                    title="Eliminar"
+
+          {/* Todo list */}
+          {todos.length === 0 ? (
+            <div style={{ padding: '24px', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
+              No hay tareas pendientes.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {todos.map(todo => (
+                <div
+                  key={todo.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '14px',
+                    padding: '12px 14px',
+                    borderRadius: '8px',
+                    background: todo.completed ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.03)',
+                    borderLeft: `3px solid ${todo.completed ? '#22C55E' : 'rgba(255,255,255,0.08)'}`,
+                    transition: 'all 0.15s',
+                    opacity: todo.completed ? 0.55 : 1,
+                  }}
+                >
+                  {/* Checkbox */}
+                  <button
+                    onClick={() => toggleTodo(todo.id, todo.completed)}
+                    style={{
+                      width: '22px', height: '22px',
+                      borderRadius: '6px',
+                      border: `2px solid ${todo.completed ? '#22C55E' : 'rgba(255,255,255,0.2)'}`,
+                      background: todo.completed ? 'rgba(34,197,94,0.15)' : 'transparent',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      transition: 'all 0.15s',
+                    }}
                   >
-                    <Trash2 size={18} />
+                    {todo.completed && <Check size={12} color="#22C55E" strokeWidth={3} />}
+                  </button>
+
+                  {/* Text */}
+                  <span
+                    style={{
+                      flex: 1,
+                      fontSize: '0.9rem',
+                      fontWeight: 500,
+                      color: todo.completed ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.85)',
+                      textDecoration: todo.completed ? 'line-through' : 'none',
+                    }}
+                  >
+                    {todo.text}
+                  </span>
+
+                  {/* Delete */}
+                  <button
+                    onClick={() => removeTodo(todo.id)}
+                    title="Eliminar"
+                    style={{
+                      width: '30px', height: '30px',
+                      borderRadius: '7px',
+                      border: '1px solid rgba(239,68,68,0.15)',
+                      background: 'rgba(239,68,68,0.05)',
+                      color: '#EF4444',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                      transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.18)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.05)'; }}
+                  >
+                    <X size={13} strokeWidth={2.5} />
                   </button>
                 </div>
-              ))
-            )}
-          </div>
-        </div>
+              ))}
+            </div>
+          )}
+        </SectionCard>
 
       </div>
     </div>

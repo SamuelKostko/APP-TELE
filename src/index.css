@@ -1,40 +1,256 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
+  /* === Paleta Corporativa Antracita + Blanco === */
   --color-brand-red: #BE1622;
   --color-brand-red-dark: #8A1019;
   --color-brand-grey: #4B4B4D;
-  --color-brand-dark: #121212;
-  --color-brand-darker: #0A0A0A;
-  --color-brand-success: #10B981;
+  --color-brand-dark: #1A1A1E;
+  --color-brand-darker: #111114;
+  --color-brand-panel: #22222A;
+  --color-brand-panel-alt: #2A2A34;
+  --color-brand-border: #3A3A46;
+  --color-brand-success: #22C55E;
   --color-brand-warning: #F59E0B;
   --color-brand-danger: #EF4444;
+  --color-brand-accent: #E8E8F0;
+  --color-brand-muted: #9090A4;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Rajdhani', system-ui, sans-serif;
 }
 
 @layer base {
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
   body {
-    @apply bg-brand-dark text-slate-100 font-sans overflow-hidden select-none;
+    @apply bg-brand-darker text-slate-100 overflow-hidden select-none;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Fondo con textura sutil */
+    background-image:
+      linear-gradient(135deg, #111114 0%, #1A1A1E 50%, #0E0E12 100%);
   }
 }
 
-/* Scrollbar styling for admin panel (if needed) */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+/* ====================== */
+/*   TV PANEL STYLES      */
+/* ====================== */
+
+.tv-panel {
+  background: rgba(34, 34, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  border-radius: 12px;
 }
 
-/* Glassmorphism utility */
+.tv-panel-accent-red {
+  border-top: 3px solid #BE1622;
+}
+
+.tv-panel-accent-success {
+  border-top: 3px solid #22C55E;
+}
+
+.tv-panel-accent-warning {
+  border-top: 3px solid #F59E0B;
+}
+
+.tv-section-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+}
+
+.tv-section-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+}
+
+/* ====================== */
+/*      STATUS BADGE      */
+/* ====================== */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.status-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+/* ====================== */
+/*    TICKER BAR          */
+/* ====================== */
+
+.ticker-bar {
+  background: rgba(22, 22, 28, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 80px;
+  animation: ticker-scroll 40s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ====================== */
+/*    SEPARATORS          */
+/* ====================== */
+
+.tv-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+}
+
+.tv-divider-v {
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+/* ====================== */
+/*    SHIP ROW TABLE      */
+/* ====================== */
+
+.ship-row {
+  border-left: 4px solid transparent;
+  background: rgba(255,255,255,0.025);
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.ship-row:hover {
+  background: rgba(255,255,255,0.045);
+}
+
+/* ====================== */
+/*    FINANCE CARD        */
+/* ====================== */
+
+.finance-card {
+  background: rgba(34, 34, 42, 0.95);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 20px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.finance-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.finance-card-bcv::before { background: #22C55E; }
+.finance-card-usdt::before { background: #F59E0B; }
+
+.finance-card-shine {
+  position: absolute;
+  top: -30px; right: -30px;
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  opacity: 0.04;
+}
+.finance-card-bcv .finance-card-shine { background: #22C55E; }
+.finance-card-usdt .finance-card-shine { background: #F59E0B; }
+
+/* ====================== */
+/*    HEADER              */
+/* ====================== */
+
+.tv-header {
+  background: rgba(20, 20, 26, 0.98);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+}
+
+.tv-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(190,22,34,0.5), rgba(190,22,34,0.8), rgba(190,22,34,0.5), transparent);
+}
+
+/* ====================== */
+/*    TODO ITEM           */
+/* ====================== */
+
+.todo-item {
+  border-left: 3px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+  border-radius: 6px;
+  padding: 14px 18px;
+  transition: all 0.2s;
+}
+
+.todo-item.completed {
+  border-left-color: #22C55E;
+  opacity: 0.55;
+}
+
+/* ====================== */
+/*    FADE IN ANIMATION   */
+/* ====================== */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out forwards;
+}
+
+/* ====================== */
+/*    SCROLLBAR           */
+/* ====================== */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+/* Legacy glass-panel (para AdminPanel) */
 .glass-panel {
   @apply bg-slate-900/40 backdrop-blur-md border border-slate-700/50 shadow-xl;
 }
