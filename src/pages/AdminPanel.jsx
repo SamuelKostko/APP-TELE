@@ -217,7 +217,7 @@ export default function AdminPanel() {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        height: '100vh',
         background: 'linear-gradient(135deg, #0E0E12 0%, #141418 60%, #0A0A0F 100%)',
         fontFamily: 'Inter, system-ui, sans-serif',
         color: '#E8E8F0',
