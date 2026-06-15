@@ -11,7 +11,9 @@ const INITIAL_FINANCE = {
 };
 
 const INITIAL_SETTINGS = {
-  showTodos: true
+  showTodos: true,
+  verticalOrder: ['header', 'content', 'ticker'],
+  contentOrder: ['ships', 'todos']
 };
 
 export function useAppStore() {

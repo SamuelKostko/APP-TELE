@@ -464,6 +464,86 @@ export default function DashboardTV() {
   const doneTodos = todos.filter(t => t.completed);
   const sortedTodos = [...pendingTodos, ...doneTodos];
 
+  const verticalOrder = settings.verticalOrder || ['header', 'content', 'ticker'];
+  const contentOrder = settings.contentOrder || ['ships', 'todos'];
+
+  // Determinar tamaño de columnas según el orden
+  let gridCols = '1fr';
+  if (settings.showTodos) {
+    gridCols = contentOrder[0] === 'todos' ? '320px 1fr' : '1fr 320px';
+  }
+
+  const renderContentPanel = (id) => {
+    if (id === 'ships') {
+      return (
+        <div
+          key="ships"
+          className="tv-panel flex flex-col"
+          style={{ padding: '20px 24px', overflow: 'hidden', borderTop: '3px solid rgba(34,197,94,0.7)' }}
+        >
+          <SectionTitle
+            icon={Ship}
+            label="Próximos Arribos — ETA"
+            count={ships.length}
+            accentColor="#22C55E"
+          />
+          <div className="tv-divider mb-4 flex-shrink-0" />
+          <ShipsTable ships={ships} />
+        </div>
+      );
+    }
+    if (id === 'todos' && settings.showTodos) {
+      return (
+        <div
+          key="todos"
+          className="tv-panel flex flex-col"
+          style={{
+            padding: '20px 24px',
+            overflow: 'hidden',
+            borderTop: '3px solid rgba(190,22,34,0.7)',
+          }}
+        >
+          <SectionTitle
+            icon={CheckSquare}
+            label="Tareas del Día"
+            count={pendingTodos.length > 0 ? pendingTodos.length : undefined}
+            accentColor="#BE1622"
+          />
+          <div className="tv-divider mb-4 flex-shrink-0" />
+          <TodoList todos={sortedTodos} />
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderComponent = (id) => {
+    switch (id) {
+      case 'header':
+        return <Header key="header" />;
+      case 'ticker':
+        return <TickerBar key="ticker" />;
+      case 'content':
+        return (
+          <div
+            key="content"
+            style={{
+              flex: 1,
+              display: 'grid',
+              gridTemplateColumns: gridCols,
+              gap: '20px',
+              padding: '20px 24px',
+              overflow: 'hidden',
+              minHeight: 0,
+            }}
+          >
+            {contentOrder.map(renderContentPanel)}
+          </div>
+        );
+      default: return null;
+    }
+  };
+
   return (
     <div
       style={{
@@ -475,60 +555,7 @@ export default function DashboardTV() {
         overflow: 'hidden',
       }}
     >
-      {/* ── HEADER ── */}
-      <Header />
-
-      {/* ── BODY ── */}
-      <div
-        style={{
-          flex: 1,
-          display: 'grid',
-          gridTemplateColumns: settings.showTodos ? '1fr 320px' : '1fr',
-          gap: '20px',
-          padding: '20px 24px',
-          overflow: 'hidden',
-          minHeight: 0,
-        }}
-      >
-        {/* ── LEFT: SHIPS ── */}
-        <div
-          className="tv-panel tv-panel-accent-success flex flex-col"
-          style={{ padding: '20px 24px', overflow: 'hidden' }}
-        >
-          <SectionTitle
-            icon={Ship}
-            label="Próximos Arribos — ETA"
-            count={ships.length}
-            accentColor="#22C55E"
-          />
-          <div className="tv-divider mb-4 flex-shrink-0" />
-          <ShipsTable ships={ships} />
-        </div>
-
-        {/* ── RIGHT: TODOS ── */}
-        {settings.showTodos && (
-          <div
-            className="tv-panel flex flex-col"
-            style={{
-              padding: '20px 24px',
-              overflow: 'hidden',
-              borderTop: '3px solid rgba(190,22,34,0.7)',
-            }}
-          >
-            <SectionTitle
-              icon={CheckSquare}
-              label="Tareas del Día"
-              count={pendingTodos.length > 0 ? pendingTodos.length : undefined}
-              accentColor="#BE1622"
-            />
-            <div className="tv-divider mb-4 flex-shrink-0" />
-            <TodoList todos={sortedTodos} />
-          </div>
-        )}
-      </div>
-
-      {/* ── TICKER ── */}
-      <TickerBar />
+      {verticalOrder.map(renderComponent)}
     </div>
   );
 }

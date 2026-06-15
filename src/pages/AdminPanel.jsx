@@ -3,7 +3,8 @@ import { useAppStore } from '../store/useAppStore';
 import {
   Settings, Plus, Trash2, Home, Save,
   CheckSquare, Eye, EyeOff, Ship, TrendingUp,
-  DollarSign, Check, X, Anchor, Clock, CheckCircle
+  DollarSign, Check, X, Anchor, Clock, CheckCircle,
+  LayoutDashboard, ArrowUp, ArrowDown, ArrowLeftRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
@@ -176,6 +177,25 @@ export default function AdminPanel() {
     updateFinance({ bcv: bcvInput, bcvEuro: bcvEuroInput, usdt: usdtInput });
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 2000);
+  };
+
+  const verticalOrder = settings.verticalOrder || ['header', 'content', 'ticker'];
+  const contentOrder = settings.contentOrder || ['ships', 'todos'];
+
+  const handleMoveVertical = (idx, direction) => {
+    const newArr = [...verticalOrder];
+    if (direction === 'up' && idx > 0) {
+      [newArr[idx - 1], newArr[idx]] = [newArr[idx], newArr[idx - 1]];
+      updateSettings({ ...settings, verticalOrder: newArr });
+    }
+    if (direction === 'down' && idx < newArr.length - 1) {
+      [newArr[idx + 1], newArr[idx]] = [newArr[idx], newArr[idx + 1]];
+      updateSettings({ ...settings, verticalOrder: newArr });
+    }
+  };
+
+  const handleSwapContent = () => {
+    updateSettings({ ...settings, contentOrder: [...contentOrder].reverse() });
   };
 
   const handleAddShip = (e) => {
@@ -674,6 +694,109 @@ export default function AdminPanel() {
               ))}
             </div>
           )}
+        </SectionCard>
+
+        {/* ROW 4: Configuración de Diseño (Layout) */}
+        <SectionCard accentColor="#3B82F6" title="Distribución de Pantalla (Layout)" icon={LayoutDashboard}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            {/* Vertical Order */}
+            <div>
+              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Orden Vertical General
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {verticalOrder.map((id, idx) => (
+                  <div
+                    key={id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '12px 16px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: '8px',
+                    }}
+                  >
+                    <span style={{ fontWeight: 600, textTransform: 'capitalize', color: '#fff' }}>
+                      {id === 'header' ? 'Cabecera (Tasas/Reloj)' : id === 'content' ? 'Contenido Central (Arribos/Tareas)' : 'Noticias (Ticker)'}
+                    </span>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        onClick={() => handleMoveVertical(idx, 'up')}
+                        disabled={idx === 0}
+                        style={{
+                          width: '28px', height: '28px', borderRadius: '6px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: idx === 0 ? 'rgba(255,255,255,0.02)' : 'rgba(59,130,246,0.1)',
+                          color: idx === 0 ? 'rgba(255,255,255,0.2)' : '#3B82F6',
+                          border: 'none', cursor: idx === 0 ? 'default' : 'pointer',
+                        }}
+                      >
+                        <ArrowUp size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleMoveVertical(idx, 'down')}
+                        disabled={idx === verticalOrder.length - 1}
+                        style={{
+                          width: '28px', height: '28px', borderRadius: '6px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: idx === verticalOrder.length - 1 ? 'rgba(255,255,255,0.02)' : 'rgba(59,130,246,0.1)',
+                          color: idx === verticalOrder.length - 1 ? 'rgba(255,255,255,0.2)' : '#3B82F6',
+                          border: 'none', cursor: idx === verticalOrder.length - 1 ? 'default' : 'pointer',
+                        }}
+                      >
+                        <ArrowDown size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Content Swap */}
+            <div>
+              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'rgba(255,255,255,0.7)', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Orden del Contenido Central
+              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '24px',
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px dashed rgba(255,255,255,0.1)',
+                  borderRadius: '12px',
+                  justifyContent: 'center'
+                }}
+              >
+                <div style={{ flex: 1, textAlign: 'center', padding: '16px', background: 'rgba(34,197,94,0.1)', color: '#22C55E', borderRadius: '8px', fontWeight: 700 }}>
+                  {contentOrder[0] === 'ships' ? 'Próximos Arribos' : 'Tareas del Día'}
+                </div>
+                
+                <button
+                  onClick={handleSwapContent}
+                  style={{
+                    width: '40px', height: '40px', borderRadius: '50%',
+                    background: '#3B82F6', color: '#fff', border: 'none',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', flexShrink: 0, boxShadow: '0 4px 12px rgba(59,130,246,0.4)'
+                  }}
+                  title="Intercambiar orden"
+                >
+                  <ArrowLeftRight size={20} />
+                </button>
+
+                <div style={{ flex: 1, textAlign: 'center', padding: '16px', background: 'rgba(190,22,34,0.1)', color: '#BE1622', borderRadius: '8px', fontWeight: 700 }}>
+                  {contentOrder[1] === 'ships' ? 'Próximos Arribos' : 'Tareas del Día'}
+                </div>
+              </div>
+              <p style={{ marginTop: '16px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center' }}>
+                El elemento de la izquierda toma el lado principal de la pantalla.
+              </p>
+            </div>
+          </div>
         </SectionCard>
 
       </div>
