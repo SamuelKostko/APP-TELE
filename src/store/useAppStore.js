@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { collection, doc, onSnapshot, setDoc, addDoc, deleteDoc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
+let bcvSyncInitialized = false;
+
 const INITIAL_FINANCE = {
   bcv: '36.50',
+  bcvEuro: '39.00',
   usdt: '40.10',
 };
 
@@ -16,6 +19,36 @@ export function useAppStore() {
   const [finance, setFinance] = useState(INITIAL_FINANCE);
   const [todos, setTodos] = useState([]);
   const [settings, setSettings] = useState(INITIAL_SETTINGS);
+
+  useEffect(() => {
+    if (!bcvSyncInitialized) {
+      bcvSyncInitialized = true;
+      const fetchBcv = async () => {
+        try {
+          const resUsd = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
+          const dataUsd = await resUsd.json();
+          const resEur = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
+          const dataEur = await resEur.json();
+          
+          let updateData = {};
+          if (dataUsd && dataUsd.promedio) {
+            updateData.bcv = dataUsd.promedio.toFixed(2);
+          }
+          if (dataEur && dataEur.promedio) {
+            updateData.bcvEuro = dataEur.promedio.toFixed(2);
+          }
+          if (Object.keys(updateData).length > 0) {
+            await setDoc(doc(db, 'finance', 'rates'), updateData, { merge: true });
+          }
+        } catch (e) {
+          console.error('Error fetching BCV auto', e);
+        }
+      };
+      
+      fetchBcv();
+      setInterval(fetchBcv, 1000 * 60 * 60); // Cada 1 hora
+    }
+  }, []);
 
   useEffect(() => {
     // Escuchar cambios en la colección de barcos

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { TrendingUp, DollarSign } from 'lucide-react';
+import { TrendingUp, DollarSign, Euro } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 
 export default function Header() {
@@ -44,7 +44,7 @@ export default function Header() {
           <div className="tv-divider" style={{ width: '60px' }} />
         </div>
 
-        {/* BCV */}
+        {/* BCV Dólar */}
         <div className="flex items-center gap-3">
           <div
             className="flex items-center justify-center rounded-md flex-shrink-0"
@@ -57,13 +57,40 @@ export default function Header() {
             <TrendingUp size={20} color="#22C55E" strokeWidth={2.5} />
           </div>
           <div>
-            <p className="tv-section-label leading-none mb-0.5">BCV Oficial</p>
+            <p className="tv-section-label leading-none mb-0.5">BCV Dólar</p>
             <p
               className="tabular-nums leading-none font-black"
               style={{ fontSize: '1.6rem', color: '#22C55E', fontFamily: 'Inter' }}
             >
               {finance.bcv}
               <span style={{ fontSize: '0.85rem', color: 'rgba(34,197,94,0.7)', marginLeft: '4px', fontWeight: 600 }}>Bs.</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Separador vertical */}
+        <div className="tv-divider-v self-stretch my-4" />
+
+        {/* BCV Euro */}
+        <div className="flex items-center gap-3">
+          <div
+            className="flex items-center justify-center rounded-md flex-shrink-0"
+            style={{
+              width: '38px', height: '38px',
+              background: 'rgba(59,130,246,0.12)',
+              border: '1px solid rgba(59,130,246,0.25)',
+            }}
+          >
+            <Euro size={20} color="#3B82F6" strokeWidth={2.5} />
+          </div>
+          <div>
+            <p className="tv-section-label leading-none mb-0.5">BCV Euro</p>
+            <p
+              className="tabular-nums leading-none font-black"
+              style={{ fontSize: '1.6rem', color: '#3B82F6', fontFamily: 'Inter' }}
+            >
+              {finance.bcvEuro}
+              <span style={{ fontSize: '0.85rem', color: 'rgba(59,130,246,0.7)', marginLeft: '4px', fontWeight: 600 }}>Bs.</span>
             </p>
           </div>
         </div>

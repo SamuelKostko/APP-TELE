@@ -156,6 +156,7 @@ export default function AdminPanel() {
   } = useAppStore();
 
   const [bcvInput, setBcvInput]         = useState(finance.bcv);
+  const [bcvEuroInput, setBcvEuroInput] = useState(finance.bcvEuro);
   const [usdtInput, setUsdtInput]       = useState(finance.usdt);
   const [newShipName, setNewShipName]   = useState('');
   const [newShipStatus, setNewShipStatus] = useState('Programado');
@@ -166,12 +167,13 @@ export default function AdminPanel() {
   // Sincronizar inputs cuando Firebase actualiza los valores
   useEffect(() => {
     setBcvInput(finance.bcv);
+    setBcvEuroInput(finance.bcvEuro);
     setUsdtInput(finance.usdt);
-  }, [finance.bcv, finance.usdt]);
+  }, [finance.bcv, finance.bcvEuro, finance.usdt]);
 
   const handleSaveFinance = (e) => {
     e.preventDefault();
-    updateFinance({ bcv: bcvInput, usdt: usdtInput });
+    updateFinance({ bcv: bcvInput, bcvEuro: bcvEuroInput, usdt: usdtInput });
     setSavedFlash(true);
     setTimeout(() => setSavedFlash(false), 2000);
   };
@@ -297,12 +299,23 @@ export default function AdminPanel() {
           <SectionCard accentColor="#22C55E" title="Tasas del Día" icon={TrendingUp}>
             <form onSubmit={handleSaveFinance} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <FieldLabel>Tasa BCV Oficial (Bs.)</FieldLabel>
+                <FieldLabel>Tasa BCV Dólar (Bs.)</FieldLabel>
                 <input
                   type="number"
                   step="0.01"
                   value={bcvInput}
                   onChange={e => setBcvInput(e.target.value)}
+                  className={inputClass}
+                  required
+                />
+              </div>
+              <div>
+                <FieldLabel>Tasa BCV Euro (Bs.)</FieldLabel>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={bcvEuroInput}
+                  onChange={e => setBcvEuroInput(e.target.value)}
                   className={inputClass}
                   required
                 />
