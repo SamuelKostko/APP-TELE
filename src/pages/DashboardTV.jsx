@@ -129,9 +129,9 @@ function ShipsTable({ ships }) {
     <div className="flex flex-col flex-1 min-h-0">
       {/* Table Header */}
       <div
-        className="grid gap-4 px-5 mb-2"
+        className="grid gap-3 px-4 mb-2"
         style={{
-          gridTemplateColumns: '40px 1fr 180px 180px 180px',
+          gridTemplateColumns: '30px 1fr 140px 140px 140px',
           paddingBottom: '10px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
@@ -178,12 +178,12 @@ function ShipsTable({ ships }) {
             return (
               <div
                 key={ship.id}
-                className="ship-row grid items-center gap-4 px-5"
+                className="ship-row grid items-center gap-3 px-4"
                 style={{
-                  gridTemplateColumns: '40px 1fr 180px 180px 180px',
+                  gridTemplateColumns: '30px 1fr 140px 140px 140px',
                   borderLeftColor: conf.border,
-                  paddingTop: '14px',
-                  paddingBottom: '14px',
+                  paddingTop: '8px',
+                  paddingBottom: '8px',
                   animationDelay: `${idx * 0.06}s`,
                 }}
               >
@@ -191,7 +191,7 @@ function ShipsTable({ ships }) {
                 <span
                   style={{
                     fontFamily: 'Rajdhani, sans-serif',
-                    fontSize: '1.2rem',
+                    fontSize: '1rem',
                     fontWeight: 700,
                     color: 'rgba(255,255,255,0.2)',
                   }}
@@ -203,8 +203,8 @@ function ShipsTable({ ships }) {
                 <div className="flex items-center gap-3">
                   <div
                     style={{
-                      width: '36px',
-                      height: '36px',
+                      width: '30px',
+                      height: '30px',
                       borderRadius: '8px',
                       background: conf.bg,
                       border: `1px solid ${conf.borderFaint}`,
@@ -214,12 +214,12 @@ function ShipsTable({ ships }) {
                       flexShrink: 0,
                     }}
                   >
-                    <Icon size={18} color={conf.color} strokeWidth={2} />
+                    <Icon size={16} color={conf.color} strokeWidth={2} />
                   </div>
                   <span
                     style={{
                       fontFamily: 'Rajdhani, sans-serif',
-                      fontSize: '1.45rem',
+                      fontSize: '1.15rem',
                       fontWeight: 700,
                       color: '#FFFFFF',
                       letterSpacing: '0.04em',
@@ -254,7 +254,7 @@ function ShipsTable({ ships }) {
                   <p
                     style={{
                       fontFamily: 'Inter',
-                      fontSize: '1.05rem',
+                      fontSize: '0.95rem',
                       fontWeight: 700,
                       color: '#FFFFFF',
                       lineHeight: 1.2,

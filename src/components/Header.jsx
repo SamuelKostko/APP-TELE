@@ -18,24 +18,24 @@ export default function Header() {
   const timeStr = format(time, 'HH:mm:ss');
 
   return (
-    <header className="tv-header flex items-stretch w-full" style={{ height: '96px' }}>
+    <header className="tv-header flex items-stretch w-full" style={{ height: '80px' }}>
 
       {/* === LOGO === */}
       <div
-        className="flex items-center px-8 flex-shrink-0"
-        style={{ borderRight: '1px solid rgba(255,255,255,0.06)', minWidth: '200px' }}
+        className="flex items-center px-6 flex-shrink-0"
+        style={{ borderRight: '1px solid rgba(255,255,255,0.06)', minWidth: '160px' }}
       >
         <img
           src="/logo.png"
           alt="TAM CARGO"
-          className="h-14 object-contain"
+          className="h-10 object-contain"
           style={{ filter: 'brightness(1.1)' }}
         />
       </div>
 
       {/* === TASAS DEL DÍA === */}
       <div
-        className="flex items-center gap-8 px-10 flex-1"
+        className="flex items-center gap-4 px-6 flex-1"
         style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}
       >
         {/* Label */}
@@ -49,21 +49,21 @@ export default function Header() {
           <div
             className="flex items-center justify-center rounded-md flex-shrink-0"
             style={{
-              width: '38px', height: '38px',
+              width: '32px', height: '32px',
               background: 'rgba(34,197,94,0.12)',
               border: '1px solid rgba(34,197,94,0.25)',
             }}
           >
-            <TrendingUp size={20} color="#22C55E" strokeWidth={2.5} />
+            <TrendingUp size={16} color="#22C55E" strokeWidth={2.5} />
           </div>
           <div>
             <p className="tv-section-label leading-none mb-0.5">BCV Dólar</p>
             <p
               className="tabular-nums leading-none font-black"
-              style={{ fontSize: '1.6rem', color: '#22C55E', fontFamily: 'Inter' }}
+              style={{ fontSize: '1.3rem', color: '#22C55E', fontFamily: 'Inter' }}
             >
               {finance.bcv}
-              <span style={{ fontSize: '0.85rem', color: 'rgba(34,197,94,0.7)', marginLeft: '4px', fontWeight: 600 }}>Bs.</span>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(34,197,94,0.7)', marginLeft: '4px', fontWeight: 600 }}>Bs.</span>
             </p>
           </div>
         </div>
@@ -76,21 +76,21 @@ export default function Header() {
           <div
             className="flex items-center justify-center rounded-md flex-shrink-0"
             style={{
-              width: '38px', height: '38px',
+              width: '32px', height: '32px',
               background: 'rgba(59,130,246,0.12)',
               border: '1px solid rgba(59,130,246,0.25)',
             }}
           >
-            <Euro size={20} color="#3B82F6" strokeWidth={2.5} />
+            <Euro size={16} color="#3B82F6" strokeWidth={2.5} />
           </div>
           <div>
             <p className="tv-section-label leading-none mb-0.5">BCV Euro</p>
             <p
               className="tabular-nums leading-none font-black"
-              style={{ fontSize: '1.6rem', color: '#3B82F6', fontFamily: 'Inter' }}
+              style={{ fontSize: '1.3rem', color: '#3B82F6', fontFamily: 'Inter' }}
             >
               {finance.bcvEuro}
-              <span style={{ fontSize: '0.85rem', color: 'rgba(59,130,246,0.7)', marginLeft: '4px', fontWeight: 600 }}>Bs.</span>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(59,130,246,0.7)', marginLeft: '4px', fontWeight: 600 }}>Bs.</span>
             </p>
           </div>
         </div>
@@ -103,21 +103,21 @@ export default function Header() {
           <div
             className="flex items-center justify-center rounded-md flex-shrink-0"
             style={{
-              width: '38px', height: '38px',
+              width: '32px', height: '32px',
               background: 'rgba(245,158,11,0.12)',
               border: '1px solid rgba(245,158,11,0.25)',
             }}
           >
-            <DollarSign size={20} color="#F59E0B" strokeWidth={2.5} />
+            <DollarSign size={16} color="#F59E0B" strokeWidth={2.5} />
           </div>
           <div>
             <p className="tv-section-label leading-none mb-0.5">USDT</p>
             <p
               className="tabular-nums leading-none font-black"
-              style={{ fontSize: '1.6rem', color: '#F59E0B', fontFamily: 'Inter' }}
+              style={{ fontSize: '1.3rem', color: '#F59E0B', fontFamily: 'Inter' }}
             >
               {finance.usdt}
-              <span style={{ fontSize: '0.85rem', color: 'rgba(245,158,11,0.7)', marginLeft: '4px', fontWeight: 600 }}>Bs.</span>
+              <span style={{ fontSize: '0.75rem', color: 'rgba(245,158,11,0.7)', marginLeft: '4px', fontWeight: 600 }}>Bs.</span>
             </p>
           </div>
         </div>
@@ -125,14 +125,14 @@ export default function Header() {
 
       {/* === RELOJ Y FECHA === */}
       <div
-        className="flex flex-col items-end justify-center px-8 flex-shrink-0 text-right"
-        style={{ minWidth: '280px' }}
+        className="flex flex-col items-end justify-center px-6 flex-shrink-0 text-right"
+        style={{ minWidth: '220px' }}
       >
         {/* Hora */}
         <div
           className="tabular-nums font-black leading-none"
           style={{
-            fontSize: '2.8rem',
+            fontSize: '2.2rem',
             fontFamily: 'Rajdhani, Inter, sans-serif',
             color: '#FFFFFF',
             letterSpacing: '-0.01em',
@@ -144,7 +144,7 @@ export default function Header() {
         <div style={{ marginTop: '4px' }}>
           <span
             className="capitalize font-semibold"
-            style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'Inter' }}
+            style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', fontFamily: 'Inter' }}
           >
             {dayName}, {dateStr}
           </span>
