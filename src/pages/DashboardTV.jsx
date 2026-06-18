@@ -131,12 +131,12 @@ function ShipsTable({ ships }) {
       <div
         className="grid gap-3 px-4 mb-2"
         style={{
-          gridTemplateColumns: '30px 1fr 140px 140px 140px',
+          gridTemplateColumns: '30px 1fr 140px 140px',
           paddingBottom: '10px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
         }}
       >
-        {['#', 'BUQUE', 'ESTADO', 'ETA', 'LLEGADA'].map((h) => (
+        {['#', 'BUQUE', 'ESTADO', 'ETA'].map((h) => (
           <span
             key={h}
             style={{
@@ -180,7 +180,7 @@ function ShipsTable({ ships }) {
                 key={ship.id}
                 className="ship-row grid items-center gap-3 px-4"
                 style={{
-                  gridTemplateColumns: '30px 1fr 140px 140px 140px',
+                  gridTemplateColumns: '30px 1fr 140px 140px',
                   borderLeftColor: conf.border,
                   paddingTop: '8px',
                   paddingBottom: '8px',
@@ -277,20 +277,6 @@ function ShipsTable({ ships }) {
                       {formattedDay}
                     </p>
                   )}
-                </div>
-
-                {/* Arrival indicator */}
-                <div
-                  style={{
-                    fontFamily: 'Inter',
-                    fontSize: '0.72rem',
-                    fontWeight: 600,
-                    color: 'rgba(255,255,255,0.3)',
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {ship.destination || '—'}
                 </div>
               </div>
             );

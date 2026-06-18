@@ -152,7 +152,7 @@ function PrimaryButton({ color = '#22C55E', icon: Icon, children, type = 'button
 export default function AdminPanel() {
   const {
     ships, finance, todos, settings,
-    addShip, removeShip, updateFinance,
+    addShip, updateShip, removeShip, updateFinance,
     addTodo, toggleTodo, removeTodo, updateSettings,
   } = useAppStore();
 
@@ -489,12 +489,13 @@ export default function AdminPanel() {
                     </span>
 
                     {/* Status */}
-                    <div
+                    <select
+                      value={ship.status}
+                      onChange={(e) => updateShip(ship.id, { status: e.target.value })}
                       style={{
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '6px',
-                        padding: '3px 10px',
+                        padding: '3px 8px',
                         borderRadius: '4px',
                         background: `${conf.color}15`,
                         border: `1px solid ${conf.color}30`,
@@ -504,17 +505,18 @@ export default function AdminPanel() {
                         textTransform: 'uppercase',
                         color: conf.color,
                         width: 'fit-content',
+                        cursor: 'pointer',
+                        appearance: 'none',
+                        outline: 'none',
+                        textAlign: 'center'
                       }}
                     >
-                      <div
-                        style={{
-                          width: '6px', height: '6px',
-                          borderRadius: '50%',
-                          background: conf.color,
-                        }}
-                      />
-                      {ship.status}
-                    </div>
+                      {STATUS_OPTIONS.map(s => (
+                        <option key={s.value} value={s.value} style={{ background: '#16161C', color: '#fff' }}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
 
                     {/* ETA */}
                     <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.3 }}>
