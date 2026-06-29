@@ -25,37 +25,12 @@ export function useAppStore() {
   useEffect(() => {
     if (!bcvSyncInitialized) {
       bcvSyncInitialized = true;
-      const fetchBcv = async () => {
+      const fetchBcvRates = async () => {
         try {
           const resUsd = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
           const dataUsd = await resUsd.json();
           const resEur = await fetch('https://ve.dolarapi.com/v1/euros/oficial');
           const dataEur = await resEur.json();
-          
-          let usdtPrice = null;
-          try {
-            const resBinance = await fetch('/api/binance', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                proMerchantAds: false,
-                page: 1,
-                rows: 1,
-                payTypes: [],
-                countries: [],
-                publisherType: null,
-                asset: 'USDT',
-                fiat: 'VES',
-                tradeType: 'SELL'
-              })
-            });
-            const dataBinance = await resBinance.json();
-            if (dataBinance && dataBinance.data && dataBinance.data.length > 0) {
-              usdtPrice = parseFloat(dataBinance.data[0].adv.price);
-            }
-          } catch (errBinance) {
-            console.error('Error fetching Binance auto', errBinance);
-          }
           
           let updateData = {};
           if (dataUsd && dataUsd.promedio) {
@@ -64,19 +39,52 @@ export function useAppStore() {
           if (dataEur && dataEur.promedio) {
             updateData.bcvEuro = dataEur.promedio.toFixed(2);
           }
-          if (usdtPrice) {
-            updateData.usdt = usdtPrice.toFixed(2);
-          }
           if (Object.keys(updateData).length > 0) {
             await setDoc(doc(db, 'finance', 'rates'), updateData, { merge: true });
           }
         } catch (e) {
-          console.error('Error fetching auto rates', e);
+          console.error('Error fetching BCV/Euro auto rates', e);
+        }
+      };
+
+      const fetchUsdtRate = async () => {
+        try {
+          let usdtPrice = null;
+          const resBinance = await fetch('/api/binance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              proMerchantAds: false,
+              page: 1,
+              rows: 1,
+              payTypes: [],
+              countries: [],
+              publisherType: null,
+              asset: 'USDT',
+              fiat: 'VES',
+              tradeType: 'SELL'
+            })
+          });
+          const dataBinance = await resBinance.json();
+          if (dataBinance && dataBinance.data && dataBinance.data.length > 0) {
+            usdtPrice = parseFloat(dataBinance.data[0].adv.price);
+          }
+          
+          if (usdtPrice) {
+            await setDoc(doc(db, 'finance', 'rates'), { usdt: usdtPrice.toFixed(2) }, { merge: true });
+          }
+        } catch (e) {
+          console.error('Error fetching Binance USDT auto rate', e);
         }
       };
       
-      fetchBcv();
-      setInterval(fetchBcv, 1000 * 60 * 60); // Cada 1 hora
+      // Ejecutar ambas la primera vez
+      fetchBcvRates();
+      fetchUsdtRate();
+
+      // Configurar intervalos separados
+      setInterval(fetchUsdtRate, 1000 * 60 * 5); // Cada 5 minutos para USDT
+      setInterval(fetchBcvRates, 1000 * 60 * 60); // Cada 1 hora para BCV/Euro
     }
   }, []);
 
