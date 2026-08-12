@@ -4,7 +4,7 @@ import {
   Settings, Plus, Trash2, Home, Save,
   CheckSquare, Eye, EyeOff, Ship, TrendingUp,
   DollarSign, Check, X, Anchor, Clock, CheckCircle,
-  LayoutDashboard, ArrowUp, ArrowDown, ArrowLeftRight
+  LayoutDashboard, ArrowUp, ArrowDown, ArrowLeftRight, Edit2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
@@ -148,12 +148,286 @@ function PrimaryButton({ color = '#22C55E', icon: Icon, children, type = 'button
   );
 }
 
+/* ─── Row Components ────────────────────────── */
+function ShipRow({ ship, updateShip, removeShip }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(ship.name);
+  const [editEta, setEditEta] = useState(ship.eta || '');
+
+  const conf = STATUS_OPTIONS.find(s => s.value === ship.status) || STATUS_OPTIONS[0];
+  const etaDisplay = ship.eta
+    ? format(parseISO(ship.eta), "d 'de' MMMM, yyyy", { locale: es })
+    : 'Por definir';
+
+  const handleSave = () => {
+    updateShip(ship.id, { name: editName.toUpperCase(), eta: editEta });
+    setIsEditing(false);
+  };
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 160px 140px 80px',
+        gap: '16px',
+        alignItems: 'center',
+        padding: '12px 14px',
+        borderRadius: '8px',
+        background: 'rgba(255,255,255,0.025)',
+        borderLeft: `3px solid ${conf.color}`,
+        transition: 'background 0.15s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; }}
+    >
+      {/* Name */}
+      {isEditing ? (
+        <input
+          type="text"
+          value={editName}
+          onChange={e => setEditName(e.target.value)}
+          className={inputClass}
+          style={{ padding: '4px 8px', textTransform: 'uppercase' }}
+        />
+      ) : (
+        <span
+          style={{
+            fontFamily: 'Rajdhani, sans-serif',
+            fontSize: '1rem',
+            fontWeight: 700,
+            color: '#fff',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
+          }}
+          title={ship.name}
+        >
+          {ship.name}
+        </span>
+      )}
+
+      {/* Status */}
+      <select
+        value={ship.status}
+        onChange={(e) => updateShip(ship.id, { status: e.target.value })}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          padding: '3px 8px',
+          borderRadius: '4px',
+          background: `${conf.color}15`,
+          border: `1px solid ${conf.color}30`,
+          fontSize: '0.65rem',
+          fontWeight: 700,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: conf.color,
+          width: 'fit-content',
+          cursor: 'pointer',
+          appearance: 'none',
+          outline: 'none',
+          textAlign: 'center'
+        }}
+      >
+        {STATUS_OPTIONS.map(s => (
+          <option key={s.value} value={s.value} style={{ background: '#16161C', color: '#fff' }}>
+            {s.label}
+          </option>
+        ))}
+      </select>
+
+      {/* ETA */}
+      {isEditing ? (
+        <input
+          type="date"
+          value={editEta}
+          onChange={e => setEditEta(e.target.value)}
+          className={inputClass}
+          style={{ padding: '4px 8px', colorScheme: 'dark' }}
+        />
+      ) : (
+        <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.3 }}>
+          {etaDisplay}
+        </span>
+      )}
+
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: '8px' }}>
+        {isEditing ? (
+          <button
+            onClick={handleSave}
+            title="Guardar"
+            style={{
+              width: '32px', height: '32px',
+              borderRadius: '7px',
+              border: '1px solid rgba(34,197,94,0.2)',
+              background: 'rgba(34,197,94,0.07)',
+              color: '#22C55E',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', flexShrink: 0,
+            }}
+          >
+            <Save size={14} strokeWidth={2.5} />
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsEditing(true)}
+            title="Editar"
+            style={{
+              width: '32px', height: '32px',
+              borderRadius: '7px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'rgba(255,255,255,0.7)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', flexShrink: 0,
+            }}
+          >
+            <Edit2 size={14} strokeWidth={2.5} />
+          </button>
+        )}
+        <button
+          onClick={() => removeShip(ship.id)}
+          title="Eliminar"
+          style={{
+            width: '32px', height: '32px',
+            borderRadius: '7px',
+            border: '1px solid rgba(239,68,68,0.2)',
+            background: 'rgba(239,68,68,0.07)',
+            color: '#EF4444',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', flexShrink: 0,
+          }}
+        >
+          <Trash2 size={14} strokeWidth={2.5} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function TodoRow({ todo, toggleTodo, removeTodo, updateTodo }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(todo.text);
+
+  const handleSave = () => {
+    if (!editText.trim()) return;
+    updateTodo(todo.id, { text: editText.trim() });
+    setIsEditing(false);
+  };
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px',
+        padding: '12px 14px',
+        borderRadius: '8px',
+        background: todo.completed ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.03)',
+        borderLeft: `3px solid ${todo.completed ? '#22C55E' : 'rgba(255,255,255,0.08)'}`,
+        transition: 'all 0.15s',
+        opacity: todo.completed ? 0.55 : 1,
+      }}
+    >
+      <button
+        onClick={() => toggleTodo(todo.id, todo.completed)}
+        style={{
+          width: '22px', height: '22px',
+          borderRadius: '6px',
+          border: `2px solid ${todo.completed ? '#22C55E' : 'rgba(255,255,255,0.2)'}`,
+          background: todo.completed ? 'rgba(34,197,94,0.15)' : 'transparent',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', flexShrink: 0,
+        }}
+      >
+        {todo.completed && <Check size={12} color="#22C55E" strokeWidth={3} />}
+      </button>
+
+      {isEditing ? (
+        <input
+          type="text"
+          value={editText}
+          onChange={e => setEditText(e.target.value)}
+          className={inputClass}
+          style={{ flex: 1, padding: '4px 8px' }}
+        />
+      ) : (
+        <span
+          style={{
+            flex: 1,
+            fontSize: '0.9rem',
+            fontWeight: 500,
+            color: todo.completed ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.85)',
+            textDecoration: todo.completed ? 'line-through' : 'none',
+          }}
+        >
+          {todo.text}
+        </span>
+      )}
+
+      <div style={{ display: 'flex', gap: '8px' }}>
+        {isEditing ? (
+          <button
+            onClick={handleSave}
+            title="Guardar"
+            style={{
+              width: '30px', height: '30px',
+              borderRadius: '7px',
+              border: '1px solid rgba(34,197,94,0.15)',
+              background: 'rgba(34,197,94,0.05)',
+              color: '#22C55E',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', flexShrink: 0,
+            }}
+          >
+            <Save size={13} strokeWidth={2.5} />
+          </button>
+        ) : (
+          <button
+            onClick={() => setIsEditing(true)}
+            title="Editar"
+            style={{
+              width: '30px', height: '30px',
+              borderRadius: '7px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'rgba(255,255,255,0.7)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', flexShrink: 0,
+            }}
+          >
+            <Edit2 size={13} strokeWidth={2.5} />
+          </button>
+        )}
+        <button
+          onClick={() => removeTodo(todo.id)}
+          title="Eliminar"
+          style={{
+            width: '30px', height: '30px',
+            borderRadius: '7px',
+            border: '1px solid rgba(239,68,68,0.15)',
+            background: 'rgba(239,68,68,0.05)',
+            color: '#EF4444',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', flexShrink: 0,
+          }}
+        >
+          <X size={13} strokeWidth={2.5} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ─── MAIN COMPONENT ────────────────────────── */
 export default function AdminPanel() {
   const {
     ships, finance, todos, settings,
     addShip, updateShip, removeShip, updateFinance,
-    addTodo, toggleTodo, removeTodo, updateSettings,
+    addTodo, updateTodo, toggleTodo, removeTodo, updateSettings,
   } = useAppStore();
 
   const [bcvInput, setBcvInput]         = useState(finance.bcv);
@@ -429,13 +703,13 @@ export default function AdminPanel() {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '1fr 160px 140px 40px',
+                  gridTemplateColumns: '1fr 160px 140px 80px',
                   gap: '16px',
                   padding: '0 14px 8px',
                   borderBottom: '1px solid rgba(255,255,255,0.05)',
                 }}
               >
-                {['BUQUE', 'ESTADO', 'ETA', ''].map((h, i) => (
+                {['BUQUE', 'ESTADO', 'ETA', 'ACCIONES'].map((h, i) => (
                   <span
                     key={i}
                     style={{
@@ -452,100 +726,14 @@ export default function AdminPanel() {
               </div>
 
               {/* Rows */}
-              {ships.map(ship => {
-                const conf = STATUS_OPTIONS.find(s => s.value === ship.status) || STATUS_OPTIONS[0];
-                const eta = ship.eta
-                  ? format(parseISO(ship.eta), "d 'de' MMMM, yyyy", { locale: es })
-                  : 'Por definir';
-                return (
-                  <div
-                    key={ship.id}
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 160px 140px 40px',
-                      gap: '16px',
-                      alignItems: 'center',
-                      padding: '12px 14px',
-                      borderRadius: '8px',
-                      background: 'rgba(255,255,255,0.025)',
-                      borderLeft: `3px solid ${conf.color}`,
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; }}
-                  >
-                    {/* Name */}
-                    <span
-                      style={{
-                        fontFamily: 'Rajdhani, sans-serif',
-                        fontSize: '1rem',
-                        fontWeight: 700,
-                        color: '#fff',
-                        letterSpacing: '0.04em',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      {ship.name}
-                    </span>
-
-                    {/* Status */}
-                    <select
-                      value={ship.status}
-                      onChange={(e) => updateShip(ship.id, { status: e.target.value })}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: '3px 8px',
-                        borderRadius: '4px',
-                        background: `${conf.color}15`,
-                        border: `1px solid ${conf.color}30`,
-                        fontSize: '0.65rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                        color: conf.color,
-                        width: 'fit-content',
-                        cursor: 'pointer',
-                        appearance: 'none',
-                        outline: 'none',
-                        textAlign: 'center'
-                      }}
-                    >
-                      {STATUS_OPTIONS.map(s => (
-                        <option key={s.value} value={s.value} style={{ background: '#16161C', color: '#fff' }}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </select>
-
-                    {/* ETA */}
-                    <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.3 }}>
-                      {eta}
-                    </span>
-
-                    {/* Delete */}
-                    <button
-                      onClick={() => removeShip(ship.id)}
-                      title="Eliminar"
-                      style={{
-                        width: '32px', height: '32px',
-                        borderRadius: '7px',
-                        border: '1px solid rgba(239,68,68,0.2)',
-                        background: 'rgba(239,68,68,0.07)',
-                        color: '#EF4444',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s',
-                        flexShrink: 0,
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.18)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.07)'; }}
-                    >
-                      <Trash2 size={14} strokeWidth={2.5} />
-                    </button>
-                  </div>
-                );
-              })}
+              {ships.map(ship => (
+                <ShipRow 
+                  key={ship.id} 
+                  ship={ship} 
+                  updateShip={updateShip} 
+                  removeShip={removeShip} 
+                />
+              ))}
             </div>
           )}
         </SectionCard>
@@ -628,71 +816,13 @@ export default function AdminPanel() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {todos.map(todo => (
-                <div
-                  key={todo.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px',
-                    padding: '12px 14px',
-                    borderRadius: '8px',
-                    background: todo.completed ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.03)',
-                    borderLeft: `3px solid ${todo.completed ? '#22C55E' : 'rgba(255,255,255,0.08)'}`,
-                    transition: 'all 0.15s',
-                    opacity: todo.completed ? 0.55 : 1,
-                  }}
-                >
-                  {/* Checkbox */}
-                  <button
-                    onClick={() => toggleTodo(todo.id, todo.completed)}
-                    style={{
-                      width: '22px', height: '22px',
-                      borderRadius: '6px',
-                      border: `2px solid ${todo.completed ? '#22C55E' : 'rgba(255,255,255,0.2)'}`,
-                      background: todo.completed ? 'rgba(34,197,94,0.15)' : 'transparent',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    {todo.completed && <Check size={12} color="#22C55E" strokeWidth={3} />}
-                  </button>
-
-                  {/* Text */}
-                  <span
-                    style={{
-                      flex: 1,
-                      fontSize: '0.9rem',
-                      fontWeight: 500,
-                      color: todo.completed ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.85)',
-                      textDecoration: todo.completed ? 'line-through' : 'none',
-                    }}
-                  >
-                    {todo.text}
-                  </span>
-
-                  {/* Delete */}
-                  <button
-                    onClick={() => removeTodo(todo.id)}
-                    title="Eliminar"
-                    style={{
-                      width: '30px', height: '30px',
-                      borderRadius: '7px',
-                      border: '1px solid rgba(239,68,68,0.15)',
-                      background: 'rgba(239,68,68,0.05)',
-                      color: '#EF4444',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      cursor: 'pointer',
-                      flexShrink: 0,
-                      transition: 'all 0.15s',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.18)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.05)'; }}
-                  >
-                    <X size={13} strokeWidth={2.5} />
-                  </button>
-                </div>
+                <TodoRow 
+                  key={todo.id} 
+                  todo={todo} 
+                  toggleTodo={toggleTodo} 
+                  removeTodo={removeTodo} 
+                  updateTodo={updateTodo} 
+                />
               ))}
             </div>
           )}

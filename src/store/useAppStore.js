@@ -187,6 +187,14 @@ export function useAppStore() {
     }
   };
 
+  const updateTodo = async (id, updatedTodo) => {
+    try {
+      await updateDoc(doc(db, 'todos', id), updatedTodo);
+    } catch (error) {
+      console.error("Error updating todo: ", error);
+    }
+  };
+
   const removeTodo = async (id) => {
     try {
       await deleteDoc(doc(db, 'todos', id));
@@ -213,6 +221,7 @@ export function useAppStore() {
     removeShip,
     updateFinance,
     addTodo,
+    updateTodo,
     toggleTodo,
     removeTodo,
     updateSettings
