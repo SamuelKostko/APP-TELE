@@ -125,6 +125,48 @@ function TickerBar() {
 /* SHIPS TABLE                          */
 /* ─────────────────────────────────── */
 function ShipsTable({ ships }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (ships.length <= 4) return;
+
+    const el = containerRef.current;
+    if (!el) return;
+
+    let scrollPos = 0;
+    let direction = 1;
+    let paused = false;
+    let timerId = null;
+
+    const scrollInterval = setInterval(() => {
+      if (paused) return;
+
+      const maxScroll = el.scrollHeight - el.clientHeight;
+      if (maxScroll <= 0) return;
+
+      scrollPos += direction * 0.5; // Velocidad de scroll
+
+      if (scrollPos >= maxScroll) {
+        scrollPos = maxScroll;
+        direction = -1;
+        paused = true;
+        timerId = setTimeout(() => { paused = false; }, 3000);
+      } else if (scrollPos <= 0) {
+        scrollPos = 0;
+        direction = 1;
+        paused = true;
+        timerId = setTimeout(() => { paused = false; }, 3000);
+      }
+
+      el.scrollTop = scrollPos;
+    }, 30);
+
+    return () => {
+      clearInterval(scrollInterval);
+      if (timerId) clearTimeout(timerId);
+    };
+  }, [ships]);
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Table Header */}
@@ -154,7 +196,12 @@ function ShipsTable({ ships }) {
       </div>
 
       {/* Rows */}
-      <div className="flex flex-col gap-2 flex-1 overflow-hidden">
+      <div 
+        ref={containerRef}
+        className="flex flex-col gap-2 flex-1 overflow-y-auto no-scrollbar"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
         {ships.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
